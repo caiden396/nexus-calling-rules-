@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Staff Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-box h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .discord-login {
+            background: #5865F2;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .discord-login:hover {
+            background: #4752C4;
+            transform: translateY(-2px);
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .welcome-screen.active {
+            display: block;
+        }
+
+        .welcome-banner {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-banner h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            50% { text-shadow: 0 0 40px rgba(255,255,255,0.8); }
+        }
+
+        /* Dashboard */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: #5865F2;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card h3 {
+            color: #5865F2;
+            margin-bottom: 15px;
+        }
+
+        /* Ticket/Case Items */
+        .ticket-item {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #5865F2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ticket-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
+        }
+
+        .ticket-item.pending {
+            border-left-color: #FFA500;
+        }
+
+        .ticket-item.closed {
+            border-left-color: #4CAF50;
+            opacity: 0.6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #5865F2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4752C4;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #F44336;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a3e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        /* Guide Sections */
+        .guide {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .guide h4 {
+            color: #5865F2;
+            margin-bottom: 10px;
+        }
+
+        .guide ul {
+            padding-left: 20px;
+        }
+
+        .guide li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        /* Access Denied */
+        .access-denied {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
+        }
+
+        .access-denied.active {
+            display: flex;
+        }
+
+        .access-denied h1 {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h1>Nexus Staff Dashboard</h1>
+            <p style="color: #666; margin-bottom: 30px;">Login with Discord to continue</p>
+            <button class="discord-login" onclick="loginWithDiscord()">
+                🔐 Login with Discord
+            </button>
+        </div>
+    </div>
+
+    <!-- Access Denied -->
+    <div class="access-denied" id="accessDenied">
+        <div>
+            <h1>🚫</h1>
+            <h2>Access Denied</h2>
+            <p>Sorry, this dashboard is for Nexus staff only.</p>
+        </div>
+    </div>
+
+    <!-- Dashboard (shown after login) -->
+    <div class="welcome-screen" id="dashboard">
+        <div class="welcome-banner" id="welcomeBanner">
+            <h1>Welcome, <span id="staffName">Staff Member</span>!</h1>
+            <p id="staffRole">Loading...</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="tab active" onclick="showTab('modmail')">📧 Modmail</button>
+                <button class="tab" onclick="showTab('feedback')">💭 Feedback</button>
+                <button class="tab" onclick="showTab('appeals')">⚖️ Appeals</button>
+                <button class="tab" onclick="showTab('call-reports')">📞 Call Reports</button>
+                <button class="tab owner-only" onclick="showTab('owner')">👑 Owner</button>
+                <button class="tab" onclick="showTab('guides')">📚 Guides</button>
+            </div>
+
+            <!-- Tab Content Areas -->
+            <div id="modmail" class="tab-content active">
+                <h2>📧 Modmail Tickets</h2>
+                <div id="modmailList"></div>
+            </div>
+
+            <div id="feedback" class="tab-content">
+                <h2>💭 User Feedback</h2>
+                <div id="feedbackList"></div>
+            </div>
+
+            <div id="appeals" class="tab-content">
+                <h2>⚖️ Ban Appeals</h2>
+                <div id="appealsList"></div>
+            </div>
+
+            <div id="call-reports" class="tab-content">
+                <h2>📞 Call Reports</h2>
+                <div id="callReportsList"></div>
+            </div>
+
+            <div id="owner" class="tab-content owner-only">
+                <h2>👑 Owner Commands</h2>
+                <div class="card">
+                    <h3>Bot Management</h3>
+                    <button class="btn btn-primary">Restart Bot</button>
+                    <button class="btn btn-primary">View Logs</button>
+                    <button class="btn btn-primary">Database Backup</button>
+                </div>
+            </div>
+
+            <div id="guides" class="tab-content">
+                <h2>📚 Staff Guides</h2>
+                <div id="guidesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for ticket details -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

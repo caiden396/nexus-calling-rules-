@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Bot - Privacy Policy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 1.05em;
+        }
+
+        .highlight {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            color: #777;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🤖</div>
+            <h1>Welcome to Nexus</h1>
+            <p class="subtitle">Your Privacy Matters to Us</p>
+        </div>
+
+        <div class="content">
+            <div class="highlight">
+                <p><strong>Effective Date:</strong> February 12, 2026</p>
+                <p>At Nexus, we are committed to protecting your privacy and safeguarding your data. This Privacy Policy outlines how we collect, process, store, and protect information obtained through your interaction with the Nexus Discord bot.</p>
+                <p><strong>By accessing or using Nexus, you acknowledge that you have read, understood, and agreed to the practices described in this Privacy Policy. If you do not agree with any part of this policy, you must discontinue use of the service immediately.</strong></p>
+            </div>
+
+            <h2>📊 1. Information We Collect</h2>
+            
+            <h3>For Calling Features:</h3>
+            <ul>
+                <li><strong>User ID:</strong> The unique identifier assigned to you by Discord, used to manage calls and cross-server communication. <span class="badge">Stored only if reported</span></li>
+                
+                <li><strong>User Name, Server Nickname, and Display Name:</strong> Your Discord name is used during calls for identification purposes. This information is sent via webhooks and is only stored if a message is reported.</li>
+                
+                <li><strong>Avatar Image:</strong> Your Discord avatar is used during calls for identification purposes and to ensure no inappropriate avatar images are involved. It is also used to provide a good user experience. <span class="badge">Stored only if reported</span></li>
+                
+                <li><strong>In-Call Messages:</strong> Messages sent during calls are transmitted to the connected server for communication. These messages are processed in real-time during calls but are <strong>not stored beyond the duration of the call unless reported</strong>.</li>
+            </ul>
+
+            <h3>For Server Leaderboards:</h3>
+            <ul>
+                <li><strong>Server Name and Server Image:</strong> For servers that appear in the top 10 most active servers leaderboard (accessible via the <code>nleaderboard</code> command), we collect and store the server name and server image/icon.</li>
+            </ul>
+
+            <h2>⏱️ 2. Data Retention</h2>
+            
+            <p>We practice strict data minimization and only retain data when necessary:</p>
+            
+            <ul>
+                <li><strong>In-Call Messages:</strong> Not stored unless reported. Reported messages are kept for <strong>30 days</strong> before being deleted.</li>
+                
+                <li><strong>User Information (ID, Names, Avatars):</strong> Retained for <strong>30 days</strong> if a message is reported. This data is deleted once the report is resolved.</li>
+                
+                <li><strong>Server Information (Name, Image):</strong> For servers displayed in the top 10 most active servers leaderboard, server names and images are retained as long as the server remains in the top 10 rankings.</li>
+            </ul>
+
+            <div class="highlight">
+                <h3>🗑️ Automatic Data Deletion</h3>
+                <p>All reported data is automatically deleted after:</p>
+                <ul>
+                    <li>30 days from the report date, OR</li>
+                    <li>When a moderator resolves the report</li>
+                </ul>
+                <p><strong>Whichever comes first.</strong></p>
+            </div>
+
+            <h2>🔒 3. How We Protect Your Data</h2>
+            
+            <p>We implement reasonable administrative, technical, and security measures to help protect your information from unauthorized access, disclosure, alteration, or destruction:</p>
+            
+            <ul>
+                <li><strong>Encryption:</strong> All data transmission is secured using industry-standard encryption (TLS/SSL).</li>
+                
+                <li><strong>Access Controls:</strong> Only authorized personnel have access to user data. All staff members are bound by strict confidentiality agreements.</li>
+                
+                <li><strong>Data Minimization:</strong> We only store the minimum data required to provide our services and ensure safety.</li>
+                
+                <li><strong>Regular Audits:</strong> Our systems are regularly reviewed to identify and address security vulnerabilities.</li>
+            </ul>
+
+            <h2>👤 4. How We Use Your Information</h2>
+            
+            <p>The information we collect is used solely for:</p>
+            
+            <ul>
+                <li>Facilitating cross-server calls and real-time communication</li>
+                <li>Moderating content and ensuring user safety</li>
+                <li>Investigating reported content and violations</li>
+                <li>Displaying server leaderboards</li>
+                <li>Improving user experience</li>
+            </ul>
+
+            <p><strong>We never sell, rent, or share your personal information with third parties for marketing purposes.</strong></p>
+
+            <h2>⚖️ 5. Your Rights</h2>
+            
+            <p>You have the right to:</p>
+            
+            <ul>
+                <li><strong>Opt Out:</strong> Stop using the bot at any time to discontinue data collection</li>
+                <li><strong>Request Deletion:</strong> Contact us to request deletion of your stored data</li>
+                <li><strong>Access Your Data:</strong> Request information about what data we have stored about you</li>
+                <li><strong>Report Concerns:</strong> Report any privacy concerns to our moderation team</li>
+            </ul>
+
+            <h2>👶 6. Children's Privacy</h2>
+            
+            <p>Nexus is not intended for users under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.</p>
+
+            <h2>📝 7. Changes to This Policy</h2>
+            
+            <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated "Effective Date." Continued use of Nexus after changes are posted constitutes acceptance of the updated policy.</p>
+
+            <h2>📧 8. Contact Us</h2>
+            
+            <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us:</p>
+            
+            <ul>
+                <li><strong>Support Server:</strong> Join our Discord server</li>
+                <li><strong>Email:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3e4e4c57485f5d477e505b464b4d135c514a105d5153">[email&#160;protected]</a></li>
+            </ul>
+
+            <div class="highlight">
+                <h3>✅ Privacy Commitment</h3>
+                <p>At Nexus, we believe privacy is a fundamental right. We are committed to transparency, data protection, and giving you control over your information. Your trust is important to us, and we work every day to earn and maintain it.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Nexus Discord Bot</strong></p>
+            <p>© 2026 Nexus. All rights reserved.</p>
+            <p style="margin-top: 15px;">
+                <span class="badge">🔒 Encrypted</span>
+                <span class="badge">🛡️ Secure</span>
+                <span class="badge">🗑️ Auto-Delete</spa
