@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Calling - Rules & Privacy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body h2 {
+            color: #667eea;
+            margin: 25px 0 15px;
+        }
+
+        .modal-body ul {
+            padding-left: 25px;
+            line-height: 1.8;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .support-card {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .support-card:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-5px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 36px; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💎 Nexus Calling</h1>
+            <p>Connect Across Discord Servers Safely</p>
+            
+            <div class="buttons">
+                <a href="https://top.gg/bot/YOUR_BOT_ID" class="btn btn-primary" target="_blank">⭐ Vote on Top.gg</a>
+                <a href="https://discord.gg/TKap76yrEp" class="btn btn-secondary" target="_blank">💬 Support Server</a>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin: 40px 0 30px;">📚 Important Documents</h2>
+        
+        <div class="card-grid">
+            <div class="card" onclick="openModal('rules')">
+                <div class="card-icon">📖</div>
+                <h3>Calling Rules</h3>
+                <p>Essential safety guidelines</p>
+            </div>
+            
+            <div class="card" onclick="openModal('privacy')">
+                <div class="card-icon">🔒</div>
+                <h3>Privacy Policy</h3>
+                <p>How we protect your data</p>
+            </div>
+            
+            <div class="card" onclick="openModal('tos')">
+                <div class="card-icon">📄</div>
+                <h3>Terms of Service</h3>
+                <p>Legal terms & conditions</p>
+            </div>
+            
+            <div class="card" onclick="openModal('conduct')">
+                <div class="card-icon">⚖️</div>
+                <h3>Code of Conduct</h3>
+                <p>Expected behavior</p>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin: 60px 0 30px;">💬 Get Support</h2>
+        
+        <div class="support-grid">
+            <a href="https://discord.gg/TKap76yrEp" class="support-card" target="_blank">
+                <div style="font-size: 40px;">💬</div>
+                <h3>Discord Server</h3>
+                <p>Join our community</p>
+            </a>
+            
+            <a href="https://top.gg/bot/YOUR_BOT_ID" class="support-card" target="_blank">
+                <div style="font-size: 40px;">⭐</div>
+                <h3>Top.gg</h3>
+                <p>Vote & Review</p>
+            </a>
+            
+            <a href="mailto:caiden55558@gmail.com" class="support-card">
+                <div style="font-size: 40px;">📧</div>
+                <h3>Email Support</h3>
+                <p>caiden55558@gmail.com</p>
+            </a>
+            
+            <a href="https://nexus-bot.com" class="support-card">
+                <div style="font-size: 40px;">🌐</div>
+                <h3>Main Website</h3>
+                <p>Visit Homepage</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Nexus Bot. All rights reserved.</p>
+            <p style="margin-top: 10px;">Built with 💎 for the Discord community</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Document Title</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Content here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const content = {
+            rules: {
+                title: '📖 Calling Rules',
+                body: `
+                    <h2>1. Be Respectful</h2>
+                    <ul>
+                        <li>Treat all users with kindness</li>
+                        <li>No harassment, bullying, or hate speech</li>
+                        <li>Respect privacy - don't share personal info</li>
+                    </ul>
+
+                    <h2>2. Content Guidelines</h2>
+                    <ul>
+                        <li>No NSFW content (auto-filtered)</li>
+                        <li>No spam or excessive skipping</li>
+                        <li>Keep conversations appropriate (13+)</li>
+                    </ul>
+
+                    <h2>3. Use Features Properly</h2>
+                    <ul>
+                        <li><code>nskip</code> - Skip if uncomfortable</li>
+                        <li><code>nreport</code> - Report violations</li>
+                        <li><code>nendcall</code> - End call anytime</li>
+                    </ul>
+
+                    <h2>4. Consequences</h2>
+                    <ul>
+                        <li>1st offense: Warning/7-day ban</li>
+                        <li>2nd offense: 30-day ban</li>
+                        <li>3rd offense: Permanent ban</li>
+                    </ul>
+                `
+            },
+            privacy: {
+                title: '🔒 Privacy Policy',
+                body: `
+                    <h2>Data We Collect</h2>
+                    <ul>
+                        <li><strong>User ID</strong> - Only if reported</li>
+                        <li><strong>Username/Avatar</strong> - Only if reported (NSFW auto-filtered)</li>
+                        <li><strong>Messages</strong> - NOT stored (real-time only) unless reported</li>
+                        <li><strong>Server Name/Icon</strong> - Only for Top 10 leaderboard</li>
+                    </ul>
+
+                    <h2>Data Retention</h2>
+                    <ul>
+                        <li>Reported content: <strong>30 days maximum</strong></li>
+                        <li>Auto-deleted when staff resolves report</li>
+                        <li>No permanent message storage</li>
+                    </ul>
+
+                    <h2>Your Rights</h2>
+                    <ul>
+                        <li>Request data deletion anytime</li>
+                        <li>Opt out by not using calling features</li>
+                        <li>Contact us: caiden55558@gmail.com</li>
+                    </ul>
+
+                    <p><strong>We never sell your data. Ever.</strong></p>
+                `
+            },
+            tos: {
+                title: '📄 Terms of Service',
+                body: `
+                    <h2>1. Acceptance</h2>
+                    <p>By using Nexus, you agree to these terms.</p>
+
+                    <h2>2. User Conduct</h2>
+                    <p>You agree NOT to:</p>
+                    <ul>
+                        <li>Violate Discord's Terms of Service</li>
+                        <li>Share illegal, harmful, or NSFW content</li>
+                        <li>Harass, threaten, or abuse other users</li>
+                        <li>Attempt to exploit or hack the bot</li>
+                    </ul>
+
+                    <h2>3. Service Availability</h2>
+                    <p>We provide the service "AS IS" without guarantees of uptime.</p>
+
+                    <h2>4. Termination</h2>
+                    <p>We may ban users who violate these terms without notice.</p>
+
+                    <h2>5. Contact</h2>
+                    <p>Questions? Email: caiden55558@gmail.com</p>
+                `
+            },
+            conduct: {
+                title: '⚖️ Code of Conduct',
+                body: `
+                    <h2>Our Values</h2>
+                    <ul>
+                        <li><strong>Respect:</strong> Treat everyone with dignity</li>
+                        <li><strong>Safety:</strong> Create safe environment</li>
+                        <li><strong>Honesty:</strong> Be truthful and authentic</li>
+                    </ul>
+
+                    <h2>Expected Behavior</h2>
+                    <ul>
+                        <li>Use friendly, appropriate language</li>
+                        <li>Give people benefit of the doubt</li>
+                        <li>Help create positive experiences</li>
+                    </ul>
+
+                    <h2>Reporting</h2>
+                    <p>If you see violations, use <code>nreport</code> or contact staff.</p>
+                    <p>All reports are confidential and reviewed within 24 hours.</p>
+                `
+            }
+        };
+
+        function openModal(type) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            title.textContent = content[type].title;
+            body.innerHTML = content[type].body;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Close on background click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+    </script>
+</body>
+</html>
