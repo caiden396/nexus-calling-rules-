@@ -1,4 +1,4 @@
-/*
+ /* 
 ═══════════════════════════════════════════════════════════════
 FILE LOCATION: staff_dashboard_backend/server.js
 DEPLOY TO RENDER AS WEB SERVICE
@@ -14,6 +14,7 @@ const session = require('express-session');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { promisify } = require('util');
+const path = require('path'); // ✅ ADD THIS
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -37,6 +38,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+const path = require('path'); // ✅ ADD THIS
 app.use(session({
     secret: process.env.SESSION_SECRET || 'staff-dashboard-secret',
     resave: false,
