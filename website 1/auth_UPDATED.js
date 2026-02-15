@@ -1,127 +1,64 @@
 /*
 ═══════════════════════════════════════════════════════════════
-FILE LOCATION: websites/main_site/auth.js
-PUT THIS FILE IN: websites folder → main_site folder → auth.js
+FILE LOCATION: websites/main_site/auth.js (UPDATED)
+REPLACE YOUR EXISTING auth.js WITH THIS VERSION
 ═══════════════════════════════════════════════════════════════
 
-DISCORD OAUTH - FRONTEND IMPLEMENTATION
-Works with oauth_backend.py running on your server
+FRONTEND AUTH - WORKS WITH BACKEND SERVER
 */
 
 // ═══ CONFIGURATION ═══
-const DISCORD_CLIENT_ID = "1462605560884101130";  // Your bot ID
-const BACKEND_URL = "http://localhost:3000";  // Change for production
-const REDIRECT_URI = window.location.origin + "/";
+const DISCORD_CLIENT_ID = "1462605560884101130";
+const BACKEND_URL = "https://nexus-oauth-backend.onrender.com";  // Your backend URL
+const REDIRECT_URI = "https://nexus-site-hv2f.onrender.com/auth/callback";
 
-// OAuth URL
+// OAuth URL - sends user to Discord
 const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
 
 // ═══ LOGIN FUNCTION ═══
 function loginWithDiscord() {
-    // Save return URL
-    localStorage.setItem('nexus_return_url', window.location.href);
-    
-    // Redirect to Discord OAuth
+    console.log('🔐 Redirecting to Discord OAuth...');
     window.location.href = OAUTH_URL;
-}
-
-// ═══ HANDLE OAUTH CALLBACK ═══
-async function handleOAuthCallback() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    
-    if (!code) return false;
-    
-    try {
-        // Show loading
-        showLoading('Logging in...');
-        
-        // Exchange code for session token
-        const response = await fetch(`${BACKEND_URL}/api/auth/discord`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ code })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Store session token
-            localStorage.setItem('nexus_session', data.session_token);
-            localStorage.setItem('nexus_user', JSON.stringify(data.user));
-            
-            // Clean URL
-            window.history.replaceState({}, document.title, "/");
-            
-            // Return to saved URL or reload
-            const returnUrl = localStorage.getItem('nexus_return_url');
-            if (returnUrl) {
-                localStorage.removeItem('nexus_return_url');
-                window.location.href = returnUrl;
-            } else {
-                window.location.reload();
-            }
-            
-            return true;
-        } else {
-            throw new Error(data.error || 'Login failed');
-        }
-        
-    } catch (error) {
-        console.error('OAuth error:', error);
-        alert('Login failed: ' + error.message);
-        
-        // Clean URL
-        window.history.replaceState({}, document.title, "/");
-        
-        return false;
-    } finally {
-        hideLoading();
-    }
 }
 
 // ═══ CHECK LOGIN STATUS ═══
 async function checkLoginStatus() {
-    const sessionToken = localStorage.getItem('nexus_session');
+    // Check URL params for login success/error
+    const urlParams = new URLSearchParams(window.location.search);
     
-    if (!sessionToken) {
+    if (urlParams.has('login') && urlParams.get('login') === 'success') {
+        console.log('✅ Login successful!');
+        // Clean URL
+        window.history.replaceState({}, document.title, '/');
+    }
+    
+    if (urlParams.has('error')) {
+        console.error('❌ Login error:', urlParams.get('error'));
+        alert('Login failed. Please try again.');
+        // Clean URL
+        window.history.replaceState({}, document.title, '/');
         showLoggedOut();
         return null;
     }
     
+    // Check session with backend
     try {
-        // Verify session with backend
         const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-            headers: {
-                'Authorization': `Bearer ${sessionToken}`
-            }
+            credentials: 'include'  // Important: sends cookies
         });
         
-        if (!response.ok) {
-            throw new Error('Invalid session');
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Update stored user data
-            localStorage.setItem('nexus_user', JSON.stringify(data.user));
-            
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ User logged in:', data.user.username);
             showLoggedIn(data.user);
             return data.user;
         } else {
-            throw new Error('Session expired');
+            console.log('ℹ️ Not logged in');
+            showLoggedOut();
+            return null;
         }
-        
     } catch (error) {
-        console.error('Session error:', error);
-        
-        // Clear invalid session
-        localStorage.removeItem('nexus_session');
-        localStorage.removeItem('nexus_user');
-        
+        console.error('❌ Session check failed:', error);
         showLoggedOut();
         return null;
     }
@@ -129,26 +66,17 @@ async function checkLoginStatus() {
 
 // ═══ LOGOUT ═══
 async function logout() {
-    const sessionToken = localStorage.getItem('nexus_session');
-    
-    if (sessionToken) {
-        try {
-            await fetch(`${BACKEND_URL}/api/auth/logout`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${sessionToken}`
-                }
-            });
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
+    try {
+        await fetch(`${BACKEND_URL}/api/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        console.log('✅ Logged out');
+    } catch (error) {
+        console.error('❌ Logout error:', error);
     }
     
-    // Clear local storage
-    localStorage.removeItem('nexus_session');
-    localStorage.removeItem('nexus_user');
-    
-    // Reload page
+    showLoggedOut();
     window.location.reload();
 }
 
@@ -170,8 +98,13 @@ function showLoggedIn(user) {
         if (avatar) avatar.src = user.avatar;
         
         const balance = document.getElementById('nexBalance');
-        if (balance) balance.textContent = `💎 ${user.balance.toLocaleString()} NEX`;
+        if (balance) {
+            // TODO: Fetch real balance from bot database
+            balance.textContent = `💎 ${user.balance || 0} NEX`;
+        }
     }
+    
+    console.log('✅ UI updated for logged in user');
 }
 
 function showLoggedOut() {
@@ -182,64 +115,37 @@ function showLoggedOut() {
     // Hide user info
     const userInfo = document.getElementById('userInfo');
     if (userInfo) userInfo.classList.remove('active');
-}
-
-function showLoading(message) {
-    const overlay = document.getElementById('loginOverlay');
-    if (overlay) {
-        overlay.classList.add('active');
-        const text = overlay.querySelector('p');
-        if (text) text.textContent = message;
-    }
-}
-
-function hideLoading() {
-    const overlay = document.getElementById('loginOverlay');
-    if (overlay) overlay.classList.remove('active');
+    
+    console.log('ℹ️ UI updated for logged out state');
 }
 
 // ═══ REFRESH BALANCE ═══
 async function refreshBalance() {
-    const sessionToken = localStorage.getItem('nexus_session');
-    if (!sessionToken) return;
-    
     try {
         const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-            headers: {
-                'Authorization': `Bearer ${sessionToken}`
-            }
+            credentials: 'include'
         });
         
-        const data = await response.json();
-        
-        if (data.success) {
+        if (response.ok) {
+            const data = await response.json();
+            
             const balance = document.getElementById('nexBalance');
             if (balance) {
-                balance.textContent = `💎 ${data.user.balance.toLocaleString()} NEX`;
+                balance.textContent = `💎 ${data.user.balance || 0} NEX`;
             }
-            
-            // Update stored data
-            localStorage.setItem('nexus_user', JSON.stringify(data.user));
         }
-        
     } catch (error) {
-        console.error('Balance refresh error:', error);
+        console.error('❌ Balance refresh error:', error);
     }
 }
 
-// ═══ AUTO-REFRESH BALANCE EVERY 30 SECONDS ═══
+// Auto-refresh balance every 30 seconds
 setInterval(refreshBalance, 30000);
 
 // ═══ INITIALIZE ON PAGE LOAD ═══
 window.addEventListener('DOMContentLoaded', async () => {
-    // Check for OAuth callback
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('code')) {
-        await handleOAuthCallback();
-    } else {
-        // Check existing session
-        await checkLoginStatus();
-    }
+    console.log('🚀 Initializing auth...');
+    await checkLoginStatus();
 });
 
 // ═══ EXPORT FUNCTIONS ═══
@@ -249,3 +155,5 @@ window.nexusAuth = {
     checkStatus: checkLoginStatus,
     refreshBalance: refreshBalance
 };
+
+console.log('✅ Auth module loaded');

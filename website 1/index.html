@@ -240,7 +240,8 @@ User logs in, sees NEX balance in corner, accesses all features
     <script>
         // ═══ DISCORD OAUTH CONFIGURATION ═══
         const DISCORD_CLIENT_ID = "1462605560884101130";  // YOUR BOT ID
-        const REDIRECT_URI = window.location.origin + "/auth/callback";
+        const REDIRECT_URI = "https://nexus-backend-of9x.onrender.com/auth/callback";
+
         
         // OAuth URL
         const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
