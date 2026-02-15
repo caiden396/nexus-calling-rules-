@@ -38,7 +38,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-const path = require('path'); // ✅ ADD THIS
 app.use(session({
     secret: process.env.SESSION_SECRET || 'staff-dashboard-secret',
     resave: false,
