@@ -1,11 +1,8 @@
 <!--
 ═══════════════════════════════════════════════════════════════
-FILE LOCATION: websites/main_site/index.html
-PUT THIS FILE IN: websites folder → main_site folder → index.html
+WEBSITE 1 - MAIN NEXUS SITE (FRONTEND)
+DEPLOY TO: Render/Netlify as Static Site
 ═══════════════════════════════════════════════════════════════
-
-MAIN NEXUS WEBSITE - WITH REAL DISCORD OAUTH
-User logs in, sees NEX balance in corner, accesses all features
 -->
 
 <!DOCTYPE html>
@@ -13,109 +10,219 @@ User logs in, sees NEX balance in corner, accesses all features
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Bot - Discord Bot</title>
+    <title>Nexus Bot - Main Site</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+        
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Top Navigation Bar */
-        .top-nav {
+        /* Animated Background */
+        .animated-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
         }
 
         .logo {
             font-size: 24px;
             font-weight: bold;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .user-info {
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #FFD700;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border-color: #FFD700;
+        }
+
+        .user-section {
             display: none;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
-        .user-info.active {
-            display: flex;
-        }
+        .user-section.active { display: flex; }
 
-        .nex-balance {
-            background: rgba(255,215,0,0.2);
+        .nex-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
             padding: 8px 16px;
             border-radius: 20px;
             font-weight: bold;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
             border: 2px solid #FFD700;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
         .login-btn {
-            background: #5865F2;
+            background: linear-gradient(135deg, #5865F2, #4752C4);
             color: white;
             padding: 10px 25px;
             border-radius: 20px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
             border: none;
-            transition: all 0.3s;
-        }
-
-        .login-btn:hover {
-            background: #4752C4;
-            transform: translateY(-2px);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
         }
 
         /* Main Content */
-        .content {
-            margin-top: 80px;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+        .main-content {
+            position: relative;
+            z-index: 1;
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
         }
 
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero */
         .hero {
             text-align: center;
-            padding: 60px 20px;
+            padding: 100px 20px 80px;
         }
 
         .hero h1 {
-            font-size: 64px;
+            font-size: 72px;
             margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero p {
             font-size: 24px;
-            opacity: 0.9;
+            opacity: 0.95;
+            margin-bottom: 40px;
         }
 
-        .feature-grid {
+        .btn {
+            padding: 15px 40px;
+            border-radius: 30px;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        /* Features Grid */
+        .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
@@ -124,245 +231,450 @@ User logs in, sees NEX balance in corner, accesses all features
 
         .feature-card {
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 40px;
             text-align: center;
-            transition: all 0.3s;
             border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
         }
 
         .feature-card:hover {
             transform: translateY(-10px);
-            background: rgba(255,255,255,0.2);
-            border-color: white;
+            border-color: #FFD700;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .feature-icon {
+        .feature-icon { font-size: 64px; margin-bottom: 20px; }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        /* Shop */
+        .section-title {
+            text-align: center;
             font-size: 48px;
             margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Login Overlay */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .login-overlay.active {
-            display: flex;
-        }
-
-        .login-box {
-            background: white;
-            color: #333;
-            padding: 50px;
-            border-radius: 20px;
+        .section-subtitle {
             text-align: center;
-            max-width: 500px;
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 40px;
         }
 
-        .login-box h2 {
+        .rotation-timer {
+            display: inline-block;
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 2px solid #FFD700;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .timer-label { font-size: 14px; opacity: 0.8; }
+
+        .timer-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .pet-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 35px;
+            border: 2px solid rgba(255,255,255,0.2);
+            text-align: center;
+            transition: all 0.4s;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-15px);
+            border-color: #FFD700;
+            box-shadow: 0 20px 60px rgba(255,215,0,0.4);
+        }
+
+        .pet-icon {
+            font-size: 100px;
             margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pet-name {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        .pet-rarity {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .rarity-common { background: #808080; }
+        .rarity-rare { background: #4169E1; }
+        .rarity-legendary { background: #FFD700; color: #000; }
+
+        .pet-price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 20px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 50px; height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 42px; }
+            .nav-tabs { display: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <div class="top-nav">
-        <div class="logo">💎 Nexus Bot</div>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <nav class="navbar">
+        <div class="logo">💎 NEXUS</div>
         
-        <!-- Before Login -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('home')">Home</div>
+            <div class="nav-tab" onclick="switchTab('shop')">Pet Shop</div>
+            <div class="nav-tab" onclick="switchTab('commands')">Commands</div>
+            <div class="nav-tab" onclick="switchTab('premium')">Premium</div>
+        </div>
+        
         <button class="login-btn" id="loginBtn" onclick="loginWithDiscord()">
-            🔐 Login with Discord
+            Login with Discord
         </button>
         
-        <!-- After Login -->
-        <div class="user-info" id="userInfo">
-            <div class="nex-balance" id="nexBalance">
-                💎 0 NEX
-            </div>
-            <img class="user-avatar" id="userAvatar" src="" alt="Avatar">
-            <span id="username">Username</span>
+        <div class="user-section" id="userSection">
+            <div class="nex-badge" id="nexBadge">💎 0 NEX</div>
+            <img class="avatar" id="userAvatar" src="" alt="">
+            <span id="username" style="font-size: 14px;"></span>
         </div>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div class="content">
-        <div class="hero">
-            <h1>💎 Welcome to Nexus</h1>
-            <p>The Ultimate All-in-One Discord Bot</p>
+    <div class="main-content">
+        <!-- Home Tab -->
+        <div class="tab-content active" id="home">
+            <div class="hero">
+                <h1>💎 NEXUS BOT</h1>
+                <p>The Ultimate All-in-One Discord Experience</p>
+                <div>
+                    <a href="https://discord.com/oauth2/authorize?client_id=1462605560884101130&permissions=8&scope=bot" class="btn btn-primary" target="_blank">
+                        Add to Discord
+                    </a>
+                    <a href="https://discord.gg/TKap76yrEp" class="btn btn-secondary" target="_blank">
+                        Join Server
+                    </a>
+                </div>
+            </div>
+
+            <div class="container">
+                <h2 class="section-title">✨ Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Economy System</h3>
+                        <p>Work, earn NEX, and build your fortune!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📞</div>
+                        <h3>Secure Calling</h3>
+                        <p>Connect across servers with encryption!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎮</div>
+                        <h3>Games & Fun</h3>
+                        <p>Slots, trivia, blackjack!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛒</div>
+                        <h3>Pet Marketplace</h3>
+                        <p>Buy, sell, trade pets with bidding!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Level System</h3>
+                        <p>Gain XP and level up!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💎</div>
+                        <h3>Premium Features</h3>
+                        <p>Custom backgrounds and more!</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <h3>Economy System</h3>
-                <p>Work, earn, and gamble with NEX currency!</p>
-            </div>
+        <!-- Shop Tab -->
+        <div class="tab-content" id="shop">
+            <div class="container">
+                <h2 class="section-title">🏪 Pet Shop</h2>
+                <p class="section-subtitle">Live inventory synced with Discord bot • Rotates hourly</p>
+                
+                <div style="text-align: center;">
+                    <div class="rotation-timer">
+                        <div class="timer-label">Next Rotation In:</div>
+                        <div class="timer-value" id="rotationTimer">--:--</div>
+                    </div>
+                </div>
 
-            <div class="feature-card">
-                <div class="feature-icon">📞</div>
-                <h3>Secure Calling</h3>
-                <p>Connect across servers with TLS/SSL encryption!</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <h3>Games & Fun</h3>
-                <p>Slots, trivia, blackjack and more!</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Level System</h3>
-                <p>Gain XP and level up!</p>
+                <div id="shopContent" class="shop-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading pets...</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Login Loading Overlay -->
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-box">
-            <h2>🔐 Logging in...</h2>
-            <p>Redirecting to Discord OAuth...</p>
+        <!-- Commands Tab -->
+        <div class="tab-content" id="commands">
+            <div class="container">
+                <h2 class="section-title">📖 Commands</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>💰 Economy</h3>
+                        <p style="font-family: monospace; line-height: 2;">
+                            nwork<br>nbalance<br>ndaily<br>nrob<br>ngive
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📞 Calling</h3>
+                        <p style="font-family: monospace; line-height: 2;">
+                            ncall<br>nskip<br>nendcall<br>nreport<br>nfriendme
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🎮 Games</h3>
+                        <p style="font-family: monospace; line-height: 2;">
+                            nslots<br>ntrivia<br>nblackjack
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🛒 Marketplace</h3>
+                        <p style="font-family: monospace; line-height: 2;">
+                            nlistpet<br>nbid<br>nmarketplace<br>nlookingfor
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium Tab -->
+        <div class="tab-content" id="premium">
+            <div class="container">
+                <h2 class="section-title">💎 Premium</h2>
+                <p class="section-subtitle">$2.99/month</p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Custom Backgrounds</h3>
+                        <p>Set custom profile backgrounds!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <h3>Colored Username</h3>
+                        <p>Stand out with colors!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Priority Matching</h3>
+                        <p>Get matched faster!</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ═══ DISCORD OAUTH CONFIGURATION ═══
-        const DISCORD_CLIENT_ID = "1462605560884101130";  // YOUR BOT ID
-        const REDIRECT_URI = "https://nexus-backend-of9x.onrender.com/auth/callback/";
-
-        
-        // OAuth URL
+        const DISCORD_CLIENT_ID = "1462605560884101130";
+        const BACKEND_URL = "https://nexus-backend-of9x.onrender.com";
+        const REDIRECT_URI = "https://nexus-backend-of9x.onrender.com/auth/callback";
         const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
 
-        // ═══ LOGIN FUNCTION ═══
+        let currentUser = null;
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'shop') {
+                loadShop();
+                startRotationTimer();
+            }
+        }
+
         function loginWithDiscord() {
-            document.getElementById('loginOverlay').classList.add('active');
-            
-            // Redirect to Discord OAuth
-            setTimeout(() => {
-                window.location.href = OAUTH_URL;
-            }, 500);
+            window.location.href = OAUTH_URL;
         }
 
-        // ═══ CHECK IF LOGGED IN ═══
         async function checkLogin() {
-            // Check URL for auth code
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            
-            if (code) {
-                // Exchange code for access token
-                await handleOAuthCallback(code);
-                
-                // Clean URL
-                window.history.replaceState({}, document.title, "/");
+            if (urlParams.has('login') && urlParams.get('login') === 'success') {
+                window.history.replaceState({}, document.title, '/');
             }
             
-            // Check for stored session
-            const sessionToken = localStorage.getItem('nexus_session');
-            if (sessionToken) {
-                await loadUserData(sessionToken);
-            }
-        }
-
-        // ═══ HANDLE OAUTH CALLBACK ═══
-        async function handleOAuthCallback(code) {
             try {
-                // Exchange code for token (this would normally be done server-side)
-                // For demo, we'll simulate getting user data
-                
-                // In production, you'd call your backend:
-                // const response = await fetch('/api/auth/discord', {
-                //     method: 'POST',
-                //     headers: {'Content-Type': 'application/json'},
-                //     body: JSON.stringify({ code })
-                // });
-                
-                // For now, simulate with Discord's API directly
-                // NOTE: In production, NEVER expose your client secret!
-                
-                // Simulate successful login
-                const mockUser = {
-                    id: "123456789",
-                    username: "DemoUser",
-                    avatar: "https://cdn.discordapp.com/embed/avatars/0.png",
-                    balance: 1250
-                };
-                
-                // Store session
-                localStorage.setItem('nexus_session', 'demo_token_123');
-                localStorage.setItem('nexus_user', JSON.stringify(mockUser));
-                
-                // Load user data
-                await loadUserData('demo_token_123');
-                
+                const response = await fetch(`${BACKEND_URL}/api/auth/me`, { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    showLoggedIn(data.user);
+                }
             } catch (error) {
-                console.error('OAuth error:', error);
-                alert('Login failed! Please try again.');
+                console.error('Login check failed:', error);
             }
         }
 
-        // ═══ LOAD USER DATA ═══
-        async function loadUserData(sessionToken) {
+        function showLoggedIn(user) {
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userSection').classList.add('active');
+            document.getElementById('username').textContent = user.username;
+            document.getElementById('userAvatar').src = user.avatar;
+            document.getElementById('nexBadge').textContent = `💎 ${(user.balance || 0).toLocaleString()} NEX`;
+        }
+
+        async function loadShop() {
             try {
-                // Get user from storage (in production, fetch from your API)
-                const userStr = localStorage.getItem('nexus_user');
-                if (!userStr) return;
-                
-                const user = JSON.parse(userStr);
-                
-                // Update UI
-                document.getElementById('loginBtn').style.display = 'none';
-                document.getElementById('userInfo').classList.add('active');
-                document.getElementById('username').textContent = user.username;
-                document.getElementById('userAvatar').src = user.avatar;
-                document.getElementById('nexBalance').textContent = `💎 ${user.balance.toLocaleString()} NEX`;
-                
+                const response = await fetch(`${BACKEND_URL}/api/shop/pets`);
+                const data = await response.json();
+                if (data.success) displayPets(data.pets);
             } catch (error) {
-                console.error('Failed to load user data:', error);
+                document.getElementById('shopContent').innerHTML = '<div class="loading"><p>Failed to load shop</p></div>';
             }
         }
 
-        // ═══ REAL IMPLEMENTATION NOTES ═══
-        /*
-        For production, you need:
-        
-        1. Backend server (Node.js, Python, etc.)
-        2. OAuth flow:
-           - User clicks login → Redirect to Discord
-           - Discord redirects back with code
-           - Backend exchanges code for access token
-           - Backend gets user info from Discord API
-           - Backend creates session, stores in database
-           - Backend fetches user's NEX balance from bot database
-           - Frontend gets session token
-        
-        3. Backend endpoints needed:
-           - POST /api/auth/discord (exchange code)
-           - GET /api/auth/me (get current user)
-           - GET /api/user/balance (get NEX balance)
-        
-        4. Security:
-           - Store CLIENT_SECRET on backend only
-           - Use HTTPS
-           - Validate all tokens
-           - Use secure session cookies
-        */
+        function displayPets(pets) {
+            const grid = document.getElementById('shopContent');
+            if (!pets || pets.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>No pets available!</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = pets.map(pet => `
+                <div class="pet-card">
+                    <div class="pet-icon">${pet.emoji}</div>
+                    <div class="pet-name">${pet.name}</div>
+                    <div class="pet-rarity rarity-${pet.rarity.toLowerCase()}">${pet.rarity}</div>
+                    <p>${pet.description}</p>
+                    <div class="pet-price">${pet.price.toLocaleString()} NEX</div>
+                    <button class="btn btn-primary" onclick="buyPet('${pet.id}', '${pet.name}', ${pet.price})">Buy Now</button>
+                </div>
+            `).join('');
+        }
 
-        // Check login on page load
-        window.addEventListener('DOMContentLoaded', checkLogin);
+        async function buyPet(petId, petName, price) {
+            if (!currentUser) {
+                alert('Please login first!');
+                return;
+            }
+            
+            if (!confirm(`Buy ${petName} for ${price.toLocaleString()} NEX?`)) return;
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/shop/buy`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ petId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert(`✅ ${petName} purchased! Check Discord with 'ninventory'`);
+                    currentUser.balance = data.newBalance;
+                    document.getElementById('nexBadge').textContent = `💎 ${data.newBalance.toLocaleString()} NEX`;
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function startRotationTimer() {
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const nextHour = new Date(now);
+            nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+            const diff = nextHour - now;
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            const timerEl = document.getElementById('rotationTimer');
+            if (timerEl) {
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            checkLogin();
+        });
     </script>
 </body>
 </html>
