@@ -1,10 +1,3 @@
-<!--
-═══════════════════════════════════════════════════════════════
-WEBSITE 1 - MAIN SITE (FIXED FRONTEND)
-Your URLs configured correctly
-═══════════════════════════════════════════════════════════════
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +6,6 @@ Your URLs configured correctly
     <title>Nexus Bot - Main Site</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         html { scroll-behavior: smooth; }
         
         body {
@@ -23,7 +15,6 @@ Your URLs configured correctly
             overflow-x: hidden;
         }
 
-        /* Animated Background */
         .animated-bg {
             position: fixed;
             top: 0; left: 0;
@@ -363,14 +354,6 @@ Your URLs configured correctly
             to { transform: rotate(360deg); }
         }
 
-        .error-box {
-            background: rgba(255,0,0,0.2);
-            border: 2px solid #ff6b6b;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
         @media (max-width: 768px) {
             .hero h1 { font-size: 42px; }
             .nav-tabs { display: none; }
@@ -471,7 +454,7 @@ Your URLs configured correctly
                 <div id="shopContent" class="shop-grid">
                     <div class="loading">
                         <div class="spinner"></div>
-                        <p>Loading pets from bot...</p>
+                        <p>Loading pets...</p>
                     </div>
                 </div>
             </div>
@@ -537,12 +520,9 @@ Your URLs configured correctly
     </div>
 
     <script>
-        // ═══ CONFIGURATION - YOUR ACTUAL URLS ═══
         const DISCORD_CLIENT_ID = "1462605560884101130";
         const BACKEND_URL = "https://nexus-backend-of9x.onrender.com";
-        const FRONTEND_URL = "https://nexus-site-hv2f.onrender.com";
         const REDIRECT_URI = "https://nexus-backend-of9x.onrender.com/auth/callback";
-        
         const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
 
         let currentUser = null;
@@ -571,43 +551,65 @@ Your URLs configured correctly
         }
 
         function loginWithDiscord() {
+            console.log('🔐 Redirecting to Discord OAuth...');
             window.location.href = OAUTH_URL;
         }
 
         async function checkLogin() {
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // Check if just logged in
             if (urlParams.has('login') && urlParams.get('login') === 'success') {
+                console.log('✅ Login callback detected!');
                 window.history.replaceState({}, document.title, '/');
+                // Wait a bit for session to be ready
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
             
             try {
+                console.log('🔍 Checking login status...');
                 const response = await fetch(`${BACKEND_URL}/api/auth/me`, { 
                     credentials: 'include',
                     mode: 'cors'
                 });
                 
+                console.log('📡 Response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    currentUser = data.user;
-                    showLoggedIn(data.user);
+                    console.log('✅ User data:', data);
+                    
+                    if (data.success && data.user) {
+                        currentUser = data.user;
+                        showLoggedIn(data.user);
+                    } else {
+                        console.log('❌ No user in response');
+                    }
                 } else {
-                    console.log('Not logged in');
+                    console.log('ℹ️ Not logged in (status:', response.status, ')');
                 }
             } catch (error) {
-                console.error('Login check error:', error);
+                console.error('❌ Login check error:', error);
             }
         }
 
         function showLoggedIn(user) {
+            console.log('🎉 Showing user as logged in:', user.username, 'Balance:', user.balance);
+            
             document.getElementById('loginBtn').style.display = 'none';
             document.getElementById('userSection').classList.add('active');
             document.getElementById('username').textContent = user.username;
             document.getElementById('userAvatar').src = user.avatar;
-            document.getElementById('nexBadge').textContent = `💎 ${(user.balance || 0).toLocaleString()} NEX`;
+            
+            // Show NEX balance
+            const balance = user.balance || 0;
+            document.getElementById('nexBadge').textContent = `💎 ${balance.toLocaleString()} NEX`;
+            
+            console.log('✅ UI updated with balance:', balance);
         }
 
         async function loadShop() {
-            console.log('Loading shop from:', BACKEND_URL);
+            console.log('🏪 Loading shop...');
             
             try {
                 const response = await fetch(`${BACKEND_URL}/api/shop/pets`, {
@@ -615,33 +617,21 @@ Your URLs configured correctly
                     credentials: 'include'
                 });
                 
-                console.log('Shop response status:', response.status);
+                console.log('📦 Shop response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('Shop data:', data);
+                console.log('✅ Shop data:', data);
                 
                 if (data.success && data.pets) {
                     displayPets(data.pets);
-                } else {
-                    throw new Error('No pets in response');
                 }
             } catch (error) {
-                console.error('Shop load error:', error);
-                document.getElementById('shopContent').innerHTML = `
-                    <div class="error-box">
-                        <h3>❌ Failed to Load Shop</h3>
-                        <p>Error: ${error.message}</p>
-                        <p style="font-size: 14px; margin-top: 10px;">
-                            <strong>Backend URL:</strong> ${BACKEND_URL}<br>
-                            <strong>Status:</strong> Check if backend is running<br>
-                            <strong>Check:</strong> <a href="${BACKEND_URL}/health" target="_blank" style="color: #FFD700;">Backend Health</a>
-                        </p>
-                    </div>
-                `;
+                console.error('❌ Shop load error:', error);
+                document.getElementById('shopContent').innerHTML = '<div class="loading"><p>Failed to load shop</p></div>';
             }
         }
 
@@ -649,11 +639,11 @@ Your URLs configured correctly
             const grid = document.getElementById('shopContent');
             
             if (!pets || pets.length === 0) {
-                grid.innerHTML = '<div class="loading"><p>No pets available right now!</p></div>';
+                grid.innerHTML = '<div class="loading"><p>No pets available!</p></div>';
                 return;
             }
             
-            console.log(`Displaying ${pets.length} pets`);
+            console.log(`📦 Displaying ${pets.length} pets`);
             
             grid.innerHTML = pets.map(pet => `
                 <div class="pet-card">
@@ -668,15 +658,28 @@ Your URLs configured correctly
         }
 
         async function buyPet(petId, petName, price) {
+            console.log('💰 Attempting to buy:', petName, 'for', price, 'NEX');
+            
             if (!currentUser) {
-                alert('Please login first!');
+                console.log('❌ Not logged in!');
+                alert('❌ Please login first!');
                 loginWithDiscord();
                 return;
             }
             
-            if (!confirm(`Buy ${petName} for ${price.toLocaleString()} NEX?`)) return;
+            console.log('💎 Current balance:', currentUser.balance);
+            
+            if (currentUser.balance < price) {
+                alert(`❌ Not enough NEX! You need ${price.toLocaleString()} NEX but have ${currentUser.balance.toLocaleString()} NEX.`);
+                return;
+            }
+            
+            if (!confirm(`Buy ${petName} for ${price.toLocaleString()} NEX?`)) {
+                return;
+            }
             
             try {
+                console.log('📤 Sending purchase request...');
                 const response = await fetch(`${BACKEND_URL}/api/shop/buy`, {
                     method: 'POST',
                     credentials: 'include',
@@ -686,16 +689,18 @@ Your URLs configured correctly
                 });
                 
                 const data = await response.json();
+                console.log('📥 Purchase response:', data);
                 
                 if (data.success) {
-                    alert(`✅ ${petName} purchased! Check Discord with 'ninventory'`);
+                    alert(`✅ ${petName} purchased! New balance: ${data.newBalance.toLocaleString()} NEX\n\nNote: This is a demo with mock data. In production, check Discord with 'ninventory'`);
                     currentUser.balance = data.newBalance;
                     document.getElementById('nexBadge').textContent = `💎 ${data.newBalance.toLocaleString()} NEX`;
-                    loadShop(); // Reload shop
+                    loadShop();
                 } else {
                     alert('❌ Purchase failed: ' + data.error);
                 }
             } catch (error) {
+                console.error('❌ Purchase error:', error);
                 alert('❌ Error: ' + error.message);
             }
         }
@@ -718,11 +723,9 @@ Your URLs configured correctly
             }
         }
 
-        // Initialize
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Initializing...');
+            console.log('🚀 Site initializing...');
             console.log('Backend URL:', BACKEND_URL);
-            console.log('Frontend URL:', FRONTEND_URL);
             createParticles();
             checkLogin();
         });
