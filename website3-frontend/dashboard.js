@@ -1,112 +1,504 @@
 /*
 ═══════════════════════════════════════════════════════════════
-FILE LOCATION: staff_dashboard/dashboard.js
-PUT THIS FILE IN: staff_dashboard folder → dashboard.js
+NEXUS STAFF DASHBOARD - FRONTEND LOGIC (V3)
 ═══════════════════════════════════════════════════════════════
-
-NEXUS STAFF DASHBOARD - COMPLETE
-- Owner stats (active users, servers, daily calls, uptime)
-- DisCloud restart integration
-- All staff features
-
-YOUR CONFIGURATION:
-- Bot ID: 1462605560884101130
-- Owner ID: 1471777621422637097
-- Staff roles configured
 */
 
-// ═══ YOUR ROLE IDS (ALREADY CONFIGURED) ═══
-const OWNER_ID = "1471777621422637097";
-const CALLING_STAFF_IDS = ["1471777769812918314"];
-const SUPPORT_STAFF_IDS = ["1471777874645225502"];
-const HELPER_IDS = ["1471778045760376984"];
-
-// ═══ DISCLOUD API CONFIGURATION ═══
-// TODO: Add your DisCloud API key and App ID here
-const DISCLOUD_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjY0NzkyMTMyODg2MTMiLCJrZXkiOiJiMjg0NDQyMzBiODEyM2U4NDUzZTY5NzVmNDIyIn0.-n8pcJe1SWIHtdQ8bIETcx8gT7mwMaW0zIsXSfEkfng";  // Get from discloud.com/profile
-const DISCLOUD_APP_ID = "1770944076416";     // Your bot's app ID
+const API_URL = 'https://nexus-staff-dashboard.onrender.com';
 
 let currentUser = null;
+let currentView = 'dashboard';
 let userRole = null;
 
-// ═══ DISCORD OAUTH LOGIN ═══
-function loginWithDiscord() {
-    // In production, implement real Discord OAuth
-    // For now, simulate login
-    setTimeout(() => {
-        currentUser = {
-            id: OWNER_ID,
-            username: "BotOwner",
-            role: 'owner'
-        };
-        checkAccess();
-    }, 1000);
-}
+// ════ INITIALIZATION ════
 
-function checkAccess() {
-    const userId = currentUser.id;
-    
-    if (userId === OWNER_ID) {
-        userRole = 'owner';
-    } else if (CALLING_STAFF_IDS.includes(userId)) {
-        userRole = 'calling_staff';
-    } else if (SUPPORT_STAFF_IDS.includes(userId)) {
-        userRole = 'support_staff';
-    } else if (HELPER_IDS.includes(userId)) {
-        userRole = 'helper';
+async function init() {
+    // Check if login parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'success') {
+        // Logged in successfully, fetch user data
+        await fetchCurrentUser();
+    } else if (urlParams.get('error')) {
+        handleLoginError(urlParams.get('error'));
     } else {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('accessDenied').classList.add('active');
-        return;
-    }
-    
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').classList.add('active');
-    
-    customizeWelcome();
-    loadDashboardData();
-    
-    if (userRole === 'owner') {
-        startOwnerStatsRefresh();
+        // Not logged in, check session
+        await checkSession();
     }
 }
 
+async function checkSession() {
+    try {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            loadDashboard();
+        } else {
+            showLoginScreen();
+        }
+    } catch (error) {
+        console.error('Session check error:', error);
+        showLoginScreen();
+    }
+}
+
+async function fetchCurrentUser() {
+    try {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            loadDashboard();
+        } else {
+            showLoginScreen();
+        }
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        showLoginScreen();
+    }
+}
+
+function loadDashboard() {
+    // Update header with user info
+    document.getElementById('userAvatar').src = currentUser.avatar;
+    document.getElementById('userName').textContent = currentUser.username;
+    document.getElementById('userRole').textContent = currentUser.rank;
+
+    // set userRole for logic
+    userRole = currentUser.role || currentUser.rank || 'helper';
+
+    // apply UI customizations based on role
+    customizeWelcome();
+
+    // Load dashboard data
+    loadDashboardStats();
+    loadRecentCases();
+}
+
+function showLoginScreen() {
+    const loginUrl = `https://discord.com/api/oauth2/authorize?client_id=1462605560884101130&redirect_uri=${encodeURIComponent(API_URL + '/auth/callback')}&response_type=code&scope=identify%20guilds.members.read`;
+    
+    window.location.href = loginUrl;
+}
+
+function handleLoginError(error) {
+    alert(`Login failed: ${error}`);
+    showLoginScreen();
+}
+
+// ════ DASHBOARD ════
+
+async function loadDashboardStats() {
+    try {
+        const response = await fetch(`${API_URL}/api/analytics/dashboard`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('totalCases').textContent = data.stats.total_cases;
+            document.getElementById('pendingCases').textContent = data.stats.pending_cases;
+            document.getElementById('pendingAppeals').textContent = data.stats.pending_appeals;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// ════ UI CUSTOMIZATION ════
 function customizeWelcome() {
     const banner = document.getElementById('welcomeBanner');
-    const name = document.getElementById('staffName');
-    const role = document.getElementById('staffRole');
-    
-    name.textContent = currentUser.username;
-    
+    const roleEl = document.getElementById('userRole');
     const config = {
-        owner: {
-            text: '👑 Nexus Bot Owner',
-            bg: 'linear-gradient(135deg, #FFD700, #FFA500)'
-        },
-        calling_staff: {
-            text: '📞 Calling Support Team',
-            bg: 'linear-gradient(135deg, #667eea, #764ba2)'
-        },
-        support_staff: {
-            text: '🛠️ Support Team',
-            bg: 'linear-gradient(135deg, #4CAF50, #45a049)'
-        },
-        helper: {
-            text: '🌟 Community Helper',
-            bg: 'linear-gradient(135deg, #2196F3, #1976D2)'
-        }
+        owner: { text: '👑 Platform Director', bg: 'linear-gradient(135deg, #FFD700, #FFA500)' },
+        calling_staff: { text: '📞 Calling Staff', bg: 'linear-gradient(135deg, #667eea, #764ba2)' },
+        support_staff: { text: '🛠️ Support Staff', bg: 'linear-gradient(135deg, #4CAF50, #45a049)' },
+        helper: { text: '🌟 Calling Associate', bg: 'linear-gradient(135deg, #2196F3, #1976D2)' }
     };
-    
+
     if (config[userRole]) {
-        role.textContent = config[userRole].text;
-        banner.style.background = config[userRole].bg;
+        roleEl.textContent = config[userRole].text;
+        if (banner) banner.style.background = config[userRole].bg;
     }
-    
-    // Hide owner-only elements
+
+    // hide owner-only UI
     if (userRole !== 'owner') {
         document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
     }
 }
+
+async function loadRecentCases() {
+    try {
+        const response = await fetch(`${API_URL}/api/calling/cases`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            populateCasesTable(data.cases.slice(0, 5), 'recentCasesTable');
+            populateAllCasesTable(data.cases, 'allCasesTable');
+        }
+    } catch (error) {
+        console.error('Error loading cases:', error);
+    }
+}
+
+function populateCasesTable(cases, tableId) {
+    const tbody = document.getElementById(tableId);
+    
+    if (cases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No cases found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = cases.map(c => `
+        <tr onclick="viewCase('${c.id}')">
+            <td><span class="case-id">${c.case_number}</span></td>
+            <td>${c.reported_id}</td>
+            <td>${c.reason}</td>
+            <td><span class="priority-${c.priority}">${c.priority.toUpperCase()}</span></td>
+            <td><span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span></td>
+            <td>${new Date(c.created_at).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+}
+
+function populateAllCasesTable(cases, tableId) {
+    const tbody = document.getElementById(tableId);
+    
+    if (cases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No cases found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = cases.map(c => `
+        <tr>
+            <td><span class="case-id">${c.case_number}</span></td>
+            <td>${c.reported_id}</td>
+            <td>${c.reason}</td>
+            <td><span class="priority-${c.priority}">${c.priority.toUpperCase()}</span></td>
+            <td><span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span></td>
+            <td>${c.assigned_to || 'Unassigned'}</td>
+            <td><button onclick="viewCase('${c.id}')" style="padding: 5px 10px; background: #8bc34a; color: #000; border: none; border-radius: 4px; cursor: pointer;">View</button></td>
+        </tr>
+    `).join('');
+}
+
+async function viewCase(caseId) {
+    try {
+        const response = await fetch(`${API_URL}/api/calling/cases/${caseId}`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            // Show case details modal
+            alert(`Case: ${data.case.case_number}\nStatus: ${data.case.status}\nNotes: ${data.notes.length} internal notes`);
+        }
+    } catch (error) {
+        console.error('Error viewing case:', error);
+    }
+}
+
+// ════ APPEALS ════
+
+async function loadAppeals() {
+    try {
+        const response = await fetch(`${API_URL}/api/appeals`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            populateAppealsTable(data.appeals);
+        }
+    } catch (error) {
+        console.error('Error loading appeals:', error);
+    }
+}
+
+function populateAppealsTable(appeals) {
+    const tbody = document.getElementById('appealsTable');
+    
+    if (appeals.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No pending appeals</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = appeals.map(a => `
+        <tr>
+            <td>${a.id.slice(0, 8)}</td>
+            <td>${a.user_id}</td>
+            <td>${a.appeal_type}</td>
+            <td>${a.message.substring(0, 40)}...</td>
+            <td><span class="status-badge status-pending">${a.status.toUpperCase()}</span></td>
+            <td><button onclick="reviewAppeal('${a.id}')" style="padding: 5px 10px; background: #8bc34a; color: #000; border: none; border-radius: 4px; cursor: pointer;">Review</button></td>
+        </tr>
+    `).join('');
+}
+
+// ════ ENFORCEMENT ════
+
+async function loadEnforcement() {
+    try {
+        const response = await fetch(`${API_URL}/api/enforcement`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            populateEnforcementTable(data.records);
+        }
+    } catch (error) {
+        console.error('Error loading enforcement:', error);
+    }
+}
+
+function populateEnforcementTable(records) {
+    const tbody = document.getElementById('enforcementTable');
+    
+    if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No enforcement actions</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = records.map(r => `
+        <tr>
+            <td>${r.user_id}</td>
+            <td>${r.type.toUpperCase()}</td>
+            <td>${r.reason}</td>
+            <td>${r.issued_by}</td>
+            <td>${new Date(r.issued_at).toLocaleDateString()}</td>
+            <td>${r.expires_at ? new Date(r.expires_at).toLocaleDateString() : 'Permanent'}</td>
+        </tr>
+    `).join('');
+}
+
+// ════ MODALS ════
+
+function openNewCaseModal() {
+    document.getElementById('newCaseModal').classList.add('active');
+}
+
+function openEnforcementModal() {
+    document.getElementById('enforcementModal').classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+async function submitNewCase(event) {
+    event.preventDefault();
+    
+    const reporterId = document.getElementById('reporterId').value;
+    const reportedId = document.getElementById('reportedId').value;
+    const reason = document.getElementById('caseReason').value;
+    const priority = document.getElementById('casePriority').value;
+    const callDuration = parseInt(document.getElementById('callDuration').value) || 0;
+    
+    try {
+        const response = await fetch(`${API_URL}/api/calling/cases`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reporter_id: reporterId,
+                reported_id: reportedId,
+                reason: reason,
+                priority: priority,
+                call_duration: callDuration
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            alert(`Case created: ${data.case.case_number}`);
+            closeModal('newCaseModal');
+            loadRecentCases();
+            loadDashboardStats();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error creating case:', error);
+        alert('Failed to create case');
+    }
+}
+
+async function submitEnforcement(event) {
+    event.preventDefault();
+    
+    const userId = document.getElementById('enforcementUserId').value;
+    const type = document.getElementById('enforcementType').value;
+    const reason = document.getElementById('enforcementReason').value;
+    const duration = parseInt(document.getElementById('enforcementDuration').value) || 0;
+    
+    try {
+        const response = await fetch(`${API_URL}/api/enforcement`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                type: type,
+                reason: reason,
+                duration: duration
+            })
+        });
+        
+        if (response.ok) {
+            alert('Enforcement action issued');
+            closeModal('enforcementModal');
+            loadEnforcement();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error issuing enforcement:', error);
+        alert('Failed to issue enforcement');
+    }
+}
+
+async function reviewAppeal(appealId) {
+    const decision = prompt('Review decision (approved/denied):');
+    const reason = prompt('Reason for decision:');
+    
+    if (!decision || !reason) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/api/appeals/${appealId}/review`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                decision: decision,
+                reason: reason
+            })
+        });
+        
+        if (response.ok) {
+            alert('Appeal reviewed');
+            loadAppeals();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error reviewing appeal:', error);
+        alert('Failed to review appeal');
+    }
+}
+
+// ════ NAVIGATION ════
+
+function switchView(view, evt) {
+    // Hide all views
+    document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
+    
+    // Remove active from nav items
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
+    // Show selected view
+    const viewElement = document.getElementById(`${view}-view`);
+    if (viewElement) {
+        viewElement.classList.remove('hidden');
+    }
+    
+    // Mark nav item as active (use passed event)
+    if (evt && evt.target) {
+        const nav = evt.target.closest('.nav-item');
+        if (nav) nav.classList.add('active');
+    }
+    
+    // Update page title
+    const titles = {
+        'dashboard': 'Dashboard',
+        'calling-cases': 'Calling Cases',
+        'appeals': 'Appeals',
+        'enforcement': 'Enforcement',
+        'guides': 'Rule Guides',
+        'notes': 'Internal Notes',
+        'staff-analytics': 'Staff Performance'
+    };
+    
+    document.getElementById('pageTitle').textContent = titles[view] || 'Dashboard';
+    
+    // Load data for specific views
+    switch(view) {
+        case 'calling-cases':
+            loadRecentCases();
+            break;
+        case 'appeals':
+            loadAppeals();
+            break;
+        case 'enforcement':
+            loadEnforcement();
+            break;
+        case 'dashboard':
+            loadDashboardStats();
+            loadRecentCases();
+            break;
+    }
+    
+    currentView = view;
+}
+
+// ════ AUTHENTICATION ════
+
+async function logout() {
+    try {
+        const response = await fetch(`${API_URL}/api/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+}
+
+// Update time display
+function updateTime() {
+    const now = new Date();
+    document.getElementById('statusTime').textContent = now.toLocaleTimeString();
+}
+
+// ════ STARTUP ════
+
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+        if (currentView === 'dashboard') {
+            loadDashboardStats();
+            loadRecentCases();
+        }
+    }, 30000);
+    
+    // Close modal when clicking outside
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    });
+});
 
 // ═══ OWNER STATS - LIVE DATA ═══
 async function loadOwnerStats() {

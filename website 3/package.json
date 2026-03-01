@@ -1,16 +1,23 @@
 {
   "name": "nexus-staff-dashboard-backend",
-  "version": "2.0.0",
-  "description": "Staff dashboard backend with role verification",
+  "version": "3.0.0",
+  "description": "Professional staff dashboard with case management & enforcement",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.6.2",
     "express-session": "^1.17.3",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0"
