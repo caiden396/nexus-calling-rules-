@@ -288,6 +288,17 @@ app.get('/auth/callback', async (req, res) => {
         // Log full error details for debugging (safe server-side only)
         console.error('Auth error details:', error.response?.data || error.message);
 
+        // If Discord rate-limited us, include retry info
+        const status = error.response?.status;
+        if (status === 429) {
+            // Discord may return retry info in headers or body
+            const retryAfterHeader = error.response.headers && (error.response.headers['retry-after'] || error.response.headers['Retry-After']);
+            const retryAfterBody = error.response.data && (error.response.data.retry_after || error.response.data?.retry_after_seconds);
+            const retryAfter = retryAfterHeader || retryAfterBody || 'unknown';
+            const reason429 = `rate_limited; retry_after=${retryAfter}`;
+            return res.redirect(`${FRONTEND_URL}?error=oauth_failed&reason=${encodeURIComponent(reason429)}`);
+        }
+
         // Extract a friendly reason when available
         const reason = (error.response && (error.response.data?.error_description || error.response.data?.error)) || error.message;
 
