@@ -239,11 +239,11 @@ app.get('/auth/callback', async (req, res) => {
     try {
         const tokenResponse = await axios.post('https://discord.com/api/oauth2/token',
             new URLSearchParams({
-                client_id: CLIENT_ID,
-                client_secret: CLIENT_SECRET,
-                grant_type: 'authorization_code',
-                code: code,
-                redirect_uri: REDIRECT_URI
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: REDIRECT_URI
             }),
             { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         );
@@ -285,8 +285,14 @@ app.get('/auth/callback', async (req, res) => {
         res.redirect(`${FRONTEND_URL}?login=success`);
         
     } catch (error) {
-        console.error('Auth error:', error.message);
-        res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
+        // Log full error details for debugging (safe server-side only)
+        console.error('Auth error details:', error.response?.data || error.message);
+
+        // Extract a friendly reason when available
+        const reason = (error.response && (error.response.data?.error_description || error.response.data?.error)) || error.message;
+
+        // Redirect with a short reason (URL-encoded) to help debug on frontend
+        res.redirect(`${FRONTEND_URL}?error=oauth_failed&reason=${encodeURIComponent(String(reason))}`);
     }
 });
 
