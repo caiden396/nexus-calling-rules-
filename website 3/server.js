@@ -230,6 +230,24 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Debug: test Discord connectivity from this host (returns status, headers, and snippet)
+app.get('/debug/discord', async (req, res) => {
+    try {
+        const resp = await axios.get('https://discord.com/api/');
+        // Return limited headers and data preview to avoid huge payloads
+        const preview = typeof resp.data === 'string' ? resp.data.slice(0, 1200) : resp.data;
+        return res.json({ ok: true, status: resp.status, headers: resp.headers, dataPreview: preview });
+    } catch (error) {
+        const resp = error.response;
+        const respDataPreview = resp && typeof resp.data === 'string' ? resp.data.slice(0, 1600) : resp?.data;
+        return res.status(resp?.status || 500).json({
+            ok: false,
+            message: error.message,
+            response: resp ? { status: resp.status, headers: resp.headers, dataPreview: respDataPreview } : null
+        });
+    }
+});
+
 // ════ AUTHENTICATION ════
 
 app.get('/auth/callback', async (req, res) => {
